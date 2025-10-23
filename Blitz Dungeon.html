@@ -26,127 +26,140 @@
     letter-spacing: 0.4px;
   }
 
-  .bubble,
-  .pill {
-    background: var(--panel);
-    border: 4px solid var(--ink);
-    border-radius: 20px;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.45);
-    color: var(--text);
-    padding: 10px 16px;
-    text-transform: uppercase;
+  #centerTip {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 0.8px;
+    text-transform: none;
+    text-shadow: 0 3px 0 rgba(0,0,0,0.45);
+    pointer-events: none;
+    white-space: pre-line;
+    font-weight: 700;
   }
-
-  .pill {
-    padding: 10px 16px;
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  #centerTip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; }
-  #centerTip .pill { font-size: 16px; text-transform:none; }
 
   #topBar {
     position: absolute;
     top: 18px;
-    left: 18px;
-    right: 18px;
+    left: 22px;
+    right: 22px;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    pointer-events: none;
   }
 
-  #roomBadge {
-    min-width: 180px;
-    text-align: center;
+  #waveLabel {
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
   }
-  #roomBadge .tag { font-size: 12px; letter-spacing: 1.4px; color: var(--accent); margin-bottom: 4px; display:block; }
-  #roomBadge .value { font-size: 30px; letter-spacing: 2px; text-shadow: 0 4px 0 rgba(0,0,0,0.4); }
-  #roomBadge .sub { font-size: 14px; letter-spacing: 1px; opacity: 0.88; text-transform:none; }
+  #waveLabel span { font-size: 26px; }
 
-  #topRight { display:flex; gap:14px; }
-  .info-card { display:flex; align-items:center; gap:10px; font-size:16px; }
-  #coinsText, #timeText { font-size: 20px; letter-spacing: 1.6px; }
-
-  .ui-icon {
-    width: 26px;
-    height: 26px;
-    flex-shrink: 0;
-  }
-  .icon-coin path { fill: var(--gold); stroke: var(--ink); stroke-width: 3px; }
-  .icon-clock path { fill: none; stroke: var(--text); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
-  .icon-heart path { fill: var(--heart); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
-  .icon-dash path { fill: var(--accent); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
+  #topRight { display:flex; gap:20px; font-size: 14px; text-transform: uppercase; letter-spacing: 1.4px; opacity: 0.85; }
+  #topRight span strong { font-size: 18px; letter-spacing: 1.8px; color: var(--text); }
 
   #hud {
     position: absolute;
-    left: 18px;
-    top: 140px;
+    left: 22px;
+    top: 66px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    width: 280px;
+    gap: 12px;
+    width: 220px;
+    pointer-events: none;
   }
 
-  .stat-card { padding: 16px 18px; }
-  .stat-card .header { display:flex; align-items:center; justify-content: space-between; margin-bottom: 10px; }
-  .stat-card .title { display:flex; align-items:center; gap:10px; font-size:16px; letter-spacing:1px; }
-  .stat-card .value { font-size:18px; letter-spacing:1px; }
+  .stat-track { display:flex; flex-direction:column; gap:6px; }
+  .stat-track .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.8px; opacity: 0.7; }
+  .stat-track .bar-row { display:flex; align-items:center; gap:12px; }
+  .stat-track .value { font-size: 14px; letter-spacing: 1px; opacity: 0.9; }
 
   .stat-bar {
-    width: 100%;
-    height: 20px;
-    border-radius: 14px;
-    background: var(--panel2);
+    flex: 1;
+    height: 14px;
     border: 3px solid var(--ink);
+    border-radius: 6px;
+    background: #1b1633;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.5);
     overflow: hidden;
     position: relative;
   }
-  .stat-bar.small { height: 16px; }
   .fill {
     height: 100%;
     width: 0;
     transition: width .12s ease-out;
-    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 20px, rgba(0,0,0,.14) 20px 26px);
+    image-rendering: pixelated;
+    background-size: 16px 16px;
+    background-image: linear-gradient(90deg, rgba(255,255,255,0.15) 0 8px, rgba(0,0,0,0.12) 8px 16px);
   }
   .fill.hp { background-color: var(--heart); }
   .fill.dash { background-color: var(--accent); }
 
   #weaponList {
     position: absolute;
-    right: 18px;
-    top: 140px;
-    display: grid;
-    gap: 12px;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+    pointer-events: none;
   }
   .weapon {
-    pointer-events: none;
-    min-width: 220px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding: 12px 16px;
-    border-radius: 18px;
-    background: var(--panel);
-    border: 4px solid var(--ink);
-    box-shadow: 0 6px 0 rgba(0,0,0,0.45);
-    font-size: 16px;
-    letter-spacing: 1px;
+    gap: 6px;
+    padding: 10px 14px;
+    min-width: 96px;
+    background: rgba(7, 5, 18, 0.55);
+    border: 3px solid rgba(0,0,0,0.4);
+    border-radius: 12px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.45);
+    transition: transform .16s ease-out, border-color .16s ease-out, box-shadow .16s ease-out;
   }
-  .weapon.active { outline: 4px solid var(--accent); background: #2f3046; }
-  .weapon .dot { font-size: 22px; }
+  .weapon.active {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 0 rgba(0,0,0,0.55);
+  }
+  .weapon-thumb {
+    width: 68px;
+    height: 34px;
+    border-radius: 8px;
+    border: 3px solid var(--ink);
+    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 45%), var(--thumb-color);
+    image-rendering: pixelated;
+  }
+  .weapon-name { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; text-align: center; }
+  .weapon-key { font-size: 11px; letter-spacing: 1.4px; opacity: 0.6; text-transform: uppercase; }
 
-  #pause { position: absolute; bottom: 16px; right: 18px; color: #b7bed9; }
+  #pause {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    color: #c3c9e8;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
 
   #testStatus {
     position: absolute;
-    left: 18px;
-    bottom: 18px;
+    left: 22px;
+    bottom: 24px;
     pointer-events: none;
-    font-size: 13px;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.7;
   }
 </style>
 </head>
@@ -154,51 +167,35 @@
 <canvas id="game"></canvas>
 <div id="ui">
   <div id="topBar">
-    <div id="roomBadge" class="bubble">
-      <span class="tag">Волна</span>
-      <span class="value" id="waveText">1</span>
-      <span class="sub" id="roomText">Комната 1</span>
-    </div>
+    <div id="waveLabel">Волна <span id="waveText">1</span></div>
     <div id="topRight">
-      <div class="bubble info-card" id="coinCard">
-        <svg viewBox="0 0 24 24" class="ui-icon icon-coin" aria-hidden="true"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm0-3c3.314 0 6-2.239 6-5s-2.686-5-6-5-6 2.239-6 5 2.686 5 6 5zm0-2c-2.21 0-4-1.343-4-3s1.79-3 4-3 4 1.343 4 3-1.79 3-4 3z"/></svg>
-        <span id="coinsText">0</span>
-      </div>
-      <div class="bubble info-card" id="timeCard">
-        <svg viewBox="0 0 24 24" class="ui-icon icon-clock" aria-hidden="true"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 4v5l4 2"/></svg>
-        <span id="timeText">00:00</span>
-      </div>
+      <span>Очки <strong id="coinsText">0</strong></span>
+      <span>Время <strong id="timeText">00:00</strong></span>
     </div>
   </div>
   <div id="hud">
-    <div class="bubble stat-card" id="hpCard">
-      <div class="header">
-        <div class="title">
-          <svg viewBox="0 0 24 24" class="ui-icon icon-heart" aria-hidden="true"><path d="M12 21s-6.8-4.3-9.7-7.8C.3 9.8 1.3 6.3 4.2 5c2-.9 4.4-.2 5.8 1.5 1.4-1.7 3.8-2.4 5.8-1.5 2.9 1.3 3.9 4.8 1.9 8.2C18.6 16.7 12 21 12 21z"/></svg>
-          <span>Здоровье</span>
+    <div class="stat-track hp">
+      <div class="label">Здоровье</div>
+      <div class="bar-row">
+        <div class="stat-bar">
+          <div id="hpFill" class="fill hp" style="width:100%"></div>
         </div>
         <div class="value" id="hpValue">6 / 6</div>
       </div>
-      <div class="stat-bar">
-        <div id="hpFill" class="fill hp" style="width:100%"></div>
-      </div>
     </div>
-    <div class="bubble stat-card" id="dashCard">
-      <div class="header">
-        <div class="title">
-          <svg viewBox="0 0 24 24" class="ui-icon icon-dash" aria-hidden="true"><path d="M4 12h16M4 16h10M4 8h12"/></svg>
-          <span>Рывок</span>
+    <div class="stat-track dash">
+      <div class="label">Рывок</div>
+      <div class="bar-row">
+        <div class="stat-bar">
+          <div id="dashFill" class="fill dash" style="width:100%"></div>
         </div>
-      </div>
-      <div class="stat-bar small">
-        <div id="dashFill" class="fill dash" style="width:100%"></div>
       </div>
     </div>
   </div>
   <div id="weaponList"></div>
-  <div id="pause" class="pill">[P] пауза • [1–4] оружие • [Q/E] смена • [Space] рывок</div>
+  <div id="pause">[P] пауза • [1–4] оружие • [Q/E] смена • [Space] рывок</div>
   <div id="centerTip"></div>
-  <div id="testStatus" class="pill" style="display:none"></div>
+  <div id="testStatus" style="display:none"></div>
 </div>
 <script>
 (() => {
@@ -212,6 +209,17 @@
   const angNorm = (a) => ((a + Math.PI) % (2*Math.PI) + (2*Math.PI)) % (2*Math.PI) - Math.PI; // [-PI, PI)
   const angDiff = (a,b) => Math.abs(angNorm(b-a));
   const angleLerp = (a,b,t) => { let d=angNorm(b-a); return a + d*clamp(t,0,1); };
+  const shadeHex = (hex, pct) => {
+    if (!/^#([0-9a-f]{6})$/i.test(hex)) return hex;
+    const num = parseInt(hex.slice(1), 16);
+    let r = (num >> 16) & 0xff;
+    let g = (num >> 8) & 0xff;
+    let b = num & 0xff;
+    r = Math.round(clamp(r + 255*pct, 0, 255));
+    g = Math.round(clamp(g + 255*pct, 0, 255));
+    b = Math.round(clamp(b + 255*pct, 0, 255));
+    return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
+  };
 
   // ===== Canvas =====
   const canvas = document.getElementById('game');
@@ -225,7 +233,6 @@
   const timeText = document.getElementById('timeText');
   const dashFill = document.getElementById('dashFill');
   const waveText = document.getElementById('waveText');
-  const roomText = document.getElementById('roomText');
   const centerTip = document.getElementById('centerTip');
   const weaponList = document.getElementById('weaponList');
   const testStatus = document.getElementById('testStatus');
@@ -305,7 +312,27 @@
     { key:'3', name:'ПП',      color:C.blue,   auto:true,  rpm: 720, dmg:1.2, bulletSpeed: 600, life: 900,  spread: 4,  pellets:1, pierce:0, radius:3, recoil: 2,  sfx:()=>SFX.shot(520) },
     { key:'4', name:'Ракета',  color:C.violet, auto:false, rpm: 60,  dmg:5,   bulletSpeed: 420, life: 2200, spread: 2,  pellets:1, pierce:0, radius:6, recoil: 12, explosive: 80, sfx:()=>SFX.shot(160) },
   ];
-  function renderWeaponList(){ weaponList.innerHTML=''; weapons.forEach((w,i)=>{ const div=document.createElement('div'); div.className='weapon'+(i===player.weaponIdx?' active':''); div.innerHTML=`<span>${i+1}. ${w.name}</span><span class="dot" style="color:${w.color}">●</span>`; weaponList.appendChild(div); }); }
+  function renderWeaponList(){
+    if (!weaponList) return;
+    weaponList.innerHTML='';
+    weapons.forEach((w,i)=>{
+      const div=document.createElement('div');
+      div.className='weapon'+(i===player.weaponIdx?' active':'');
+      div.style.setProperty('--thumb-color', `linear-gradient(180deg, ${w.color} 0%, ${shadeHex(w.color,-0.25)} 100%)`);
+      const thumb=document.createElement('div');
+      thumb.className='weapon-thumb';
+      const name=document.createElement('div');
+      name.className='weapon-name';
+      name.textContent=w.name;
+      const key=document.createElement('div');
+      key.className='weapon-key';
+      key.textContent=w.key;
+      div.appendChild(thumb);
+      div.appendChild(name);
+      div.appendChild(key);
+      weaponList.appendChild(div);
+    });
+  }
   renderWeaponList();
 
   // ===== Enemies (5 types) + boss =====
@@ -370,7 +397,10 @@
     bullets.length=0; enemies.length=0; particles.length=0; state.killsInRoom=0; state.bossActive=false; boss=null; state.roomId++;
     const pool=[...ALL_TYPES]; roomTypes=[]; while(roomTypes.length<5 && pool.length){ const i=rndInt(0,pool.length-1); roomTypes.push(pool.splice(i,1)[0]); }
     for(let i=0;i<6;i++) spawnEnemy();
-    if (centerTip) { centerTip.innerHTML = `<div class="pill" style="padding:10px 14px">Комната ${state.roomId}: типы — ${roomTypes.join(', ')}</div>`; setTimeout(()=>{ if(centerTip) centerTip.innerHTML=''; },1500); }
+    if (centerTip) {
+      centerTip.textContent = `Комната ${state.roomId}\nТипы: ${roomTypes.join(', ')}`;
+      setTimeout(()=>{ if(centerTip) centerTip.textContent=''; },1500);
+    }
   }
 
   // ===== Dungeon (flat tiles, cave walls) =====
@@ -475,10 +505,10 @@
   }
 
   // ===== UI boot text =====
-  centerTip.innerHTML = '<div class="pill" style="padding:12px 16px">WASD — движение • Мышь/тачпад — прицел • ЛКМ — огонь • Space — рывок<br/>Рывок идёт <b>в сторону движения</b> (WASD), если стоишь — по взгляду. [F] авто‑огонь • [X] ассист • [L] pointer‑lock</div>';
-  setTimeout(()=>{ if(centerTip) centerTip.innerHTML=''; }, 3000);
+  centerTip.textContent = 'WASD — движение • Мышь/тачпад — прицел • ЛКМ — огонь • Space — рывок\nРывок идёт в сторону движения (WASD), если стоишь — по взгляду.\n[F] авто‑огонь • [X] ассист • [L] pointer-lock';
+  setTimeout(()=>{ if(centerTip) centerTip.textContent=''; }, 3000);
 
-  function flashTip(txt){ if(!centerTip) return; centerTip.innerHTML = `<div class=\"pill\" style=\"padding:10px 14px\">${txt}</div>`; setTimeout(()=>{ if(centerTip) centerTip.innerHTML=''; }, 1200);}  
+  function flashTip(txt){ if(!centerTip) return; centerTip.textContent = txt; setTimeout(()=>{ if(centerTip) centerTip.textContent=''; }, 1200); }
 
   function updateHud(){
     // === Health bar ===
@@ -498,9 +528,8 @@
     if (timeText){ timeText.textContent = `${m}:${s}`; }
 
     // === Room / wave info ===
-    const roomNumber = Math.max(1, state.roomId);
-    if (waveText) waveText.textContent = roomNumber.toString().padStart(2,'0');
-    if (roomText) roomText.textContent = `Комната ${roomNumber}`;
+    const waveNumber = Math.max(1, state.roomId);
+    if (waveText) waveText.textContent = waveNumber.toString().padStart(2,'0');
 
     // === Dash cooldown bar ===
     if (dashFill){
@@ -509,7 +538,7 @@
     }
 
     // === Weapon list active highlight ===
-    renderWeaponList(); weaponList.children[player.weaponIdx]?.classList.add('active');
+    renderWeaponList();
   }
 
   // ===== Shooting =====
@@ -545,7 +574,14 @@
   function explode(x,y,r, baseDmg){ SFX.boom(); for(let i=0;i<22;i++){ particles.push(new Particle(x, y, Math.cos(i/22*TAU)*rand(40,200), Math.sin(i/22*TAU)*rand(40,200), 600, '#e6e8f0')); } enemies.forEach(e=>{ const d=Math.hypot(e.x-x, e.y-y); if(d<r){ const fall = 1 - d/r; damageEnemy(e, baseDmg*(.5+fall)); }}); }
 
   // ===== Loop =====
-  function togglePause(){ state.running = !state.running; if (!state.running) { centerTip.innerHTML = '<div class="pill" style="padding:12px 16px">ПАУЗА — [P] продолжить</div>'; } else centerTip.innerHTML=''; }
+  function togglePause(){
+    state.running = !state.running;
+    if (!state.running) {
+      if (centerTip) centerTip.textContent = 'Пауза — [P] продолжить';
+    } else if (centerTip) {
+      centerTip.textContent = '';
+    }
+  }
 
   let last = now();
   function frame(){
@@ -609,7 +645,7 @@
       state.lastSpawn += dt; const rate = Math.max(420, state.spawnRate - state.time*0.05); if (!state.bossActive && state.lastSpawn > rate){ state.lastSpawn = 0; spawnEnemy(); if (Math.random()<0.25) spawnEnemy(); }
 
       // Death
-      if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); centerTip.innerHTML = `<div class=\"pill\" style=\"padding:12px 16px; text-align:center\">Вы пали. Счёт: <b>${state.score}</b><br/>Рекорд: <b>${best}</b><br/><small>Нажми R, чтобы сыграть снова</small></div>`; }
+      if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); centerTip.textContent = `Вы пали.\nСчёт: ${state.score}\nРекорд: ${best}\nНажми R, чтобы сыграть снова`; }
     }
 
     // ===== Render =====
@@ -638,7 +674,7 @@
     if (e.code==='KeyE'){ player.weaponIdx = (player.weaponIdx + 1)%weapons.length; renderWeaponList(); }
     if (e.code==='KeyR' && player.hp<=0){ restart(); }
   });
-  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.innerHTML=''; startNewRoom(); }
+  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.textContent=''; startNewRoom(); }
 
   // ===== Boot sequence =====
   resize();    // ensure geometry exists
@@ -651,7 +687,7 @@
   function runTests(){
     try {
       // UI & dungeon
-      assert(hpFill && hpValue && coinsText && timeText && dashFill && centerTip && weaponList && waveText && roomText, 'UI elements missing');
+      assert(hpFill && hpValue && coinsText && timeText && dashFill && centerTip && weaponList && waveText, 'UI elements missing');
       assert(Array.isArray(dungeon.rim) && dungeon.rim.length>0, 'Dungeon geometry not built');
       assert(roomTypes.length===5, 'Room must have exactly 5 enemy types');
       assert(enemies.length>=1, 'Enemies should spawn at room start');
