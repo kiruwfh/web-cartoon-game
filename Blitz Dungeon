@@ -7,56 +7,193 @@
   <style>
   /* Flat cartoon UI — no glow, no blur, thick ink outlines */
   :root{
-    --ink:#111318; --panel:#1b1e26; --panel2:#232838; --line:#2a2f3a; --text:#e6e8f0; --accent:#5fb3ff; --gold:#d9ba4f; --heart:#ff6b7d;
+    --ink:#110a1c; --panel:#2b2152; --panel2:#362a68; --line:#3b2f75; --text:#f5f2ff; --accent:#ff8fd3; --gold:#ffd45f; --heart:#ff6b7d;
   }
-  html, body { height: 100%; margin: 0; background: #0c0d11; color: var(--text);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(circle at top, #3b2a6d 0%, #1a163b 55%, #080414 100%);
+    color: var(--text);
+    font-family: "Nunito", "Baloo 2", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
+  }
   canvas { display:block; width: 100vw; height: 100vh; image-rendering: pixelated; }
 
-  #ui { position: fixed; inset: 0; pointer-events: none; }
-  #hud { position: absolute; left: 14px; top: 12px; font-weight: 800; letter-spacing:.3px; }
-  #hud .row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  #ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+  }
 
-  .pill { padding: 8px 12px; border-radius: 12px; background: var(--panel); color: var(--text);
-          border: 3px solid var(--ink); box-shadow: none; }
+  .bubble,
+  .pill {
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.45);
+    color: var(--text);
+    padding: 10px 16px;
+    text-transform: uppercase;
+  }
 
-  .bar { width: 200px; height: 14px; border-radius: 10px; background: var(--panel);
-         border: 3px solid var(--ink); overflow: hidden; position: relative; }
-  .fill { height: 100%; width: 0; background: var(--accent);
-          background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 16px, rgba(0,0,0,.12) 16px 18px);
-          transition: width .08s linear; }
+  .pill {
+    padding: 10px 16px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   #centerTip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; }
-  #centerTip .pill { padding: 12px 16px; }
+  #centerTip .pill { font-size: 16px; text-transform:none; }
 
-  #weaponList { position: absolute; right: 14px; top: 12px; display: grid; gap: 8px; }
-  .weapon { pointer-events: none; min-width: 200px; display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 12px; border-radius: 12px; background: var(--panel); border: 3px solid var(--ink); }
-  .weapon.active { outline: 3px solid var(--accent); background: #243042; }
+  #topBar {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
 
-  #pause { position: absolute; bottom: 12px; right: 14px; color: #9aa3c0; }
+  #roomBadge {
+    min-width: 180px;
+    text-align: center;
+  }
+  #roomBadge .tag { font-size: 12px; letter-spacing: 1.4px; color: var(--accent); margin-bottom: 4px; display:block; }
+  #roomBadge .value { font-size: 30px; letter-spacing: 2px; text-shadow: 0 4px 0 rgba(0,0,0,0.4); }
+  #roomBadge .sub { font-size: 14px; letter-spacing: 1px; opacity: 0.88; text-transform:none; }
 
-  #testStatus { position: absolute; left: 14px; bottom: 12px; pointer-events: none; font-size: 12px; background:var(--panel);
-                border:3px solid var(--ink); border-radius:10px; padding:6px 8px; }
+  #topRight { display:flex; gap:14px; }
+  .info-card { display:flex; align-items:center; gap:10px; font-size:16px; }
+  #coinsText, #timeText { font-size: 20px; letter-spacing: 1.6px; }
 
-  /* Iconography (cartoon SVGs) */
-  .ui-icons svg{ width: 18px; height: 18px; vertical-align: -3px; }
-  .heart svg { width:18px; height:18px; margin-right: 2px; }
-  .heart.full path { fill: var(--heart); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
-  .heart.empty path{ fill: transparent; stroke: #3b3f4d; stroke-width: 3px; stroke-linejoin: round; }
-  .coin path  { fill: var(--gold); stroke: var(--ink); stroke-width: 3px; }
-  .clock path { fill: none; stroke: var(--text); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+  .ui-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .icon-coin path { fill: var(--gold); stroke: var(--ink); stroke-width: 3px; }
+  .icon-clock path { fill: none; stroke: var(--text); stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-heart path { fill: var(--heart); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
+  .icon-dash path { fill: var(--accent); stroke: var(--ink); stroke-width: 3px; stroke-linejoin: round; }
 
-  /* Small badges inside pills */
-  .badge { display:inline-flex; gap:6px; align-items:center; }
+  #hud {
+    position: absolute;
+    left: 18px;
+    top: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 280px;
+  }
+
+  .stat-card { padding: 16px 18px; }
+  .stat-card .header { display:flex; align-items:center; justify-content: space-between; margin-bottom: 10px; }
+  .stat-card .title { display:flex; align-items:center; gap:10px; font-size:16px; letter-spacing:1px; }
+  .stat-card .value { font-size:18px; letter-spacing:1px; }
+
+  .stat-bar {
+    width: 100%;
+    height: 20px;
+    border-radius: 14px;
+    background: var(--panel2);
+    border: 3px solid var(--ink);
+    overflow: hidden;
+    position: relative;
+  }
+  .stat-bar.small { height: 16px; }
+  .fill {
+    height: 100%;
+    width: 0;
+    transition: width .12s ease-out;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 20px, rgba(0,0,0,.14) 20px 26px);
+  }
+  .fill.hp { background-color: var(--heart); }
+  .fill.dash { background-color: var(--accent); }
+
+  #weaponList {
+    position: absolute;
+    right: 18px;
+    top: 140px;
+    display: grid;
+    gap: 12px;
+  }
+  .weapon {
+    pointer-events: none;
+    min-width: 220px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 18px;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.45);
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  .weapon.active { outline: 4px solid var(--accent); background: #2f3046; }
+  .weapon .dot { font-size: 22px; }
+
+  #pause { position: absolute; bottom: 16px; right: 18px; color: #b7bed9; }
+
+  #testStatus {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    pointer-events: none;
+    font-size: 13px;
+  }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <div id="ui">
+  <div id="topBar">
+    <div id="roomBadge" class="bubble">
+      <span class="tag">Волна</span>
+      <span class="value" id="waveText">1</span>
+      <span class="sub" id="roomText">Комната 1</span>
+    </div>
+    <div id="topRight">
+      <div class="bubble info-card" id="coinCard">
+        <svg viewBox="0 0 24 24" class="ui-icon icon-coin" aria-hidden="true"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm0-3c3.314 0 6-2.239 6-5s-2.686-5-6-5-6 2.239-6 5 2.686 5 6 5zm0-2c-2.21 0-4-1.343-4-3s1.79-3 4-3 4 1.343 4 3-1.79 3-4 3z"/></svg>
+        <span id="coinsText">0</span>
+      </div>
+      <div class="bubble info-card" id="timeCard">
+        <svg viewBox="0 0 24 24" class="ui-icon icon-clock" aria-hidden="true"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 4v5l4 2"/></svg>
+        <span id="timeText">00:00</span>
+      </div>
+    </div>
+  </div>
   <div id="hud">
-    <div class="row"><div class="pill" id="hpText">HP: 6/6</div><div class="bar"><div id="dashFill" class="fill"></div></div><div class="pill">Dash</div></div>
-    <div class="row"><div class="pill" id="scoreText">Score: 0</div><div class="pill" id="timeText">00:00</div></div>
+    <div class="bubble stat-card" id="hpCard">
+      <div class="header">
+        <div class="title">
+          <svg viewBox="0 0 24 24" class="ui-icon icon-heart" aria-hidden="true"><path d="M12 21s-6.8-4.3-9.7-7.8C.3 9.8 1.3 6.3 4.2 5c2-.9 4.4-.2 5.8 1.5 1.4-1.7 3.8-2.4 5.8-1.5 2.9 1.3 3.9 4.8 1.9 8.2C18.6 16.7 12 21 12 21z"/></svg>
+          <span>Здоровье</span>
+        </div>
+        <div class="value" id="hpValue">6 / 6</div>
+      </div>
+      <div class="stat-bar">
+        <div id="hpFill" class="fill hp" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="bubble stat-card" id="dashCard">
+      <div class="header">
+        <div class="title">
+          <svg viewBox="0 0 24 24" class="ui-icon icon-dash" aria-hidden="true"><path d="M4 12h16M4 16h10M4 8h12"/></svg>
+          <span>Рывок</span>
+        </div>
+      </div>
+      <div class="stat-bar small">
+        <div id="dashFill" class="fill dash" style="width:100%"></div>
+      </div>
+    </div>
   </div>
   <div id="weaponList"></div>
   <div id="pause" class="pill">[P] пауза • [1–4] оружие • [Q/E] смена • [Space] рывок</div>
@@ -82,10 +219,13 @@
   const DPR = Math.max(1, Math.floor(window.devicePixelRatio || 1));
 
   // ===== UI Refs =====
-  const hpText = document.getElementById('hpText');
-  const scoreText = document.getElementById('scoreText');
+  const hpFill = document.getElementById('hpFill');
+  const hpValue = document.getElementById('hpValue');
+  const coinsText = document.getElementById('coinsText');
   const timeText = document.getElementById('timeText');
   const dashFill = document.getElementById('dashFill');
+  const waveText = document.getElementById('waveText');
+  const roomText = document.getElementById('roomText');
   const centerTip = document.getElementById('centerTip');
   const weaponList = document.getElementById('weaponList');
   const testStatus = document.getElementById('testStatus');
@@ -165,7 +305,7 @@
     { key:'3', name:'ПП',      color:C.blue,   auto:true,  rpm: 720, dmg:1.2, bulletSpeed: 600, life: 900,  spread: 4,  pellets:1, pierce:0, radius:3, recoil: 2,  sfx:()=>SFX.shot(520) },
     { key:'4', name:'Ракета',  color:C.violet, auto:false, rpm: 60,  dmg:5,   bulletSpeed: 420, life: 2200, spread: 2,  pellets:1, pierce:0, radius:6, recoil: 12, explosive: 80, sfx:()=>SFX.shot(160) },
   ];
-  function renderWeaponList(){ weaponList.innerHTML=''; weapons.forEach((w,i)=>{ const div=document.createElement('div'); div.className='weapon'+(i===player.weaponIdx?' active':''); div.innerHTML=`<span>${i+1}. ${w.name}</span><span style="color:${w.color}">●</span>`; weaponList.appendChild(div); }); }
+  function renderWeaponList(){ weaponList.innerHTML=''; weapons.forEach((w,i)=>{ const div=document.createElement('div'); div.className='weapon'+(i===player.weaponIdx?' active':''); div.innerHTML=`<span>${i+1}. ${w.name}</span><span class="dot" style="color:${w.color}">●</span>`; weaponList.appendChild(div); }); }
   renderWeaponList();
 
   // ===== Enemies (5 types) + boss =====
@@ -341,32 +481,32 @@
   function flashTip(txt){ if(!centerTip) return; centerTip.innerHTML = `<div class=\"pill\" style=\"padding:10px 14px\">${txt}</div>`; setTimeout(()=>{ if(centerTip) centerTip.innerHTML=''; }, 1200);}  
 
   function updateHud(){
-    // === Hearts ===
-    const heartSVG = (full) => `
-      <svg viewBox='0 0 24 24' class='heart ${full?'full':'empty'}' aria-hidden='true'>
-        <path d='M12 21s-6.8-4.3-9.7-7.8C.3 9.8 1.3 6.3 4.2 5c2-.9 4.4-.2 5.8 1.5 1.4-1.7 3.8-2.4 5.8-1.5 2.9 1.3 3.9 4.8 1.9 8.2C18.6 16.7 12 21 12 21z'/>
-      </svg>`;
-    let hearts = '';
-    for (let i=0;i<player.maxHp;i++) hearts += heartSVG(i < player.hp);
-    hpText.innerHTML = `<span class='badge ui-icons'>${hearts}</span>`;
+    // === Health bar ===
+    if (hpFill && hpValue){
+      const hpRatio = clamp(player.hp / player.maxHp, 0, 1);
+      hpFill.style.width = (hpRatio * 100) + '%';
+      const hpCurr = Math.max(0, Math.round(player.hp * 10) / 10);
+      const hpLabel = Number.isInteger(hpCurr) ? Math.round(hpCurr) : hpCurr.toFixed(1);
+      hpValue.textContent = `${hpLabel} / ${player.maxHp}`;
+    }
 
-    // === Score ===
-    scoreText.innerHTML = `
-      <span class='badge ui-icons'>
-        <svg viewBox='0 0 24 24' class='coin' aria-hidden='true'><path d='M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z'/></svg>
-        <span>${state.score}</span>
-      </span>`;
+    // === Coins ===
+    if (coinsText){ coinsText.textContent = state.score; }
 
     // === Time ===
     const secs=Math.floor(state.time/1000); const m=(''+Math.floor(secs/60)).padStart(2,'0'); const s=(''+(secs%60)).padStart(2,'0');
-    timeText.innerHTML = `
-      <span class='badge ui-icons'>
-        <svg viewBox='0 0 24 24' class='clock' aria-hidden='true'><path d='M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 4v5l4 2'/></svg>
-        <span>${m}:${s}</span>
-      </span>`;
+    if (timeText){ timeText.textContent = `${m}:${s}`; }
+
+    // === Room / wave info ===
+    const roomNumber = Math.max(1, state.roomId);
+    if (waveText) waveText.textContent = roomNumber.toString().padStart(2,'0');
+    if (roomText) roomText.textContent = `Комната ${roomNumber}`;
 
     // === Dash cooldown bar ===
-    const dashPct = clamp(1 - player.dashCd/1000, 0, 1); dashFill.style.width = (dashPct*200)+'px';
+    if (dashFill){
+      const dashPct = clamp(1 - player.dashCd/1000, 0, 1);
+      dashFill.style.width = (dashPct * 100) + '%';
+    }
 
     // === Weapon list active highlight ===
     renderWeaponList(); weaponList.children[player.weaponIdx]?.classList.add('active');
@@ -498,7 +638,7 @@
     if (e.code==='KeyE'){ player.weaponIdx = (player.weaponIdx + 1)%weapons.length; renderWeaponList(); }
     if (e.code==='KeyR' && player.hp<=0){ restart(); }
   });
-  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.innerHTML=''; startNewRoom(); }
+  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.innerHTML=''; startNewRoom(); }
 
   // ===== Boot sequence =====
   resize();    // ensure geometry exists
@@ -511,7 +651,7 @@
   function runTests(){
     try {
       // UI & dungeon
-      assert(hpText && scoreText && timeText && dashFill && centerTip && weaponList, 'UI elements missing');
+      assert(hpFill && hpValue && coinsText && timeText && dashFill && centerTip && weaponList && waveText && roomText, 'UI elements missing');
       assert(Array.isArray(dungeon.rim) && dungeon.rim.length>0, 'Dungeon geometry not built');
       assert(roomTypes.length===5, 'Room must have exactly 5 enemy types');
       assert(enemies.length>=1, 'Enemies should spawn at room start');
