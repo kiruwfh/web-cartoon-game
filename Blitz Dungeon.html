@@ -31,6 +31,8 @@
     left: 50%;
     top: 32px;
     transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
     font-size: 16px;
     letter-spacing: 0.8px;
@@ -155,6 +157,17 @@
     pointer-events: none;
   }
 
+  #pause {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    color: #c3c9e8;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
   #levelIndicator {
     position: absolute;
     left: 22px;
@@ -170,6 +183,9 @@
     position: absolute;
     left: 22px;
     bottom: 62px;
+    pointer-events: none;
+    left: 22px;
+    bottom: 24px;
     pointer-events: none;
     font-size: 12px;
     letter-spacing: 1.2px;
@@ -417,6 +433,10 @@
     for(let i=0;i<6;i++) spawnEnemy();
     setTip(`Комната ${state.roomId}\nТипы: ${roomTypes.join(', ')}`);
     setTimeout(()=>{ clearTipIfNonDeath(); },1500);
+    if (centerTip) {
+      centerTip.textContent = `Комната ${state.roomId}\nТипы: ${roomTypes.join(', ')}`;
+      setTimeout(()=>{ if(centerTip) centerTip.textContent=''; },1500);
+    }
   }
 
   // ===== Dungeon (flat tiles, cave walls) =====
@@ -528,6 +548,10 @@
   setTimeout(()=>{ clearTipIfNonDeath(); }, 3000);
 
   function flashTip(txt){ if(!centerTip) return; setTip(txt); setTimeout(()=>{ clearTipIfNonDeath(); }, 1200); }
+  centerTip.textContent = 'WASD — движение • Мышь/тачпад — прицел • ЛКМ — огонь • Space — рывок\nРывок идёт в сторону движения (WASD), если стоишь — по взгляду.\n[F] авто‑огонь • [X] ассист • [L] pointer-lock';
+  setTimeout(()=>{ if(centerTip) centerTip.textContent=''; }, 3000);
+
+  function flashTip(txt){ if(!centerTip) return; centerTip.textContent = txt; setTimeout(()=>{ if(centerTip) centerTip.textContent=''; }, 1200); }
 
   function updateHud(){
     // === Health bar ===
@@ -613,6 +637,9 @@
       setTip('Пауза — [P] продолжить');
     } else {
       clearTipIfNonDeath();
+      if (centerTip) centerTip.textContent = 'Пауза — [P] продолжить';
+    } else if (centerTip) {
+      centerTip.textContent = '';
     }
   }
 
@@ -681,6 +708,7 @@
 
       // Death
       if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); setTip(`Вы пали.\nСчёт: ${state.score}\nРекорд: ${best}\nНажми R, чтобы сыграть снова`, true); }
+      if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); centerTip.textContent = `Вы пали.\nСчёт: ${state.score}\nРекорд: ${best}\nНажми R, чтобы сыграть снова`; }
     }
 
     // ===== Render =====
@@ -710,6 +738,7 @@
     if (e.code==='KeyR' && player.hp<=0){ restart(); }
   });
   function restart(){ bullets.length=0; enemies.length=0; particles.length=0; xpDrops.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; state.xp=0; state.level=1; state.nextXp=50; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; setTip(''); startNewRoom(); }
+  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.textContent=''; startNewRoom(); }
 
   // ===== Boot sequence =====
   resize();    // ensure geometry exists
