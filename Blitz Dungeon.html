@@ -29,6 +29,8 @@
   #centerTip {
     position: absolute;
     left: 50%;
+    top: 32px;
+    transform: translateX(-50%);
     top: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
@@ -39,6 +41,10 @@
     pointer-events: none;
     white-space: pre-line;
     font-weight: 700;
+  }
+  #centerTip.death {
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   #topBar {
@@ -151,8 +157,33 @@
     pointer-events: none;
   }
 
+  #pause {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    color: #c3c9e8;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  #levelIndicator {
+    position: absolute;
+    left: 22px;
+    bottom: 24px;
+    pointer-events: none;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
   #testStatus {
     position: absolute;
+    left: 22px;
+    bottom: 62px;
+    pointer-events: none;
     left: 22px;
     bottom: 24px;
     pointer-events: none;
@@ -193,6 +224,7 @@
     </div>
   </div>
   <div id="weaponList"></div>
+  <div id="levelIndicator">Ур. 1 — XP 0/50</div>
   <div id="pause">[P] пауза • [1–4] оружие • [Q/E] смена • [Space] рывок</div>
   <div id="centerTip"></div>
   <div id="testStatus" style="display:none"></div>
@@ -235,6 +267,7 @@
   const waveText = document.getElementById('waveText');
   const centerTip = document.getElementById('centerTip');
   const weaponList = document.getElementById('weaponList');
+  const levelIndicator = document.getElementById('levelIndicator');
   const testStatus = document.getElementById('testStatus');
 
   function resize() {
@@ -255,7 +288,8 @@
   window.addEventListener('pointerdown', () => { if (!audioCtx) { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } }, { once: true });
 
   // ===== Game State =====
-  const state = { running: true, time: 0, score: 0, lastSpawn: 0, spawnRate: 1200, roomId: 0, killsInRoom: 0, bossActive:false, bootAimMs: 1200 };
+  const state = { running: true, time: 0, score: 0, lastSpawn: 0, spawnRate: 1200, roomId: 0, killsInRoom: 0, bossActive:false, bootAimMs: 1200,
+    xp: 0, level: 1, nextXp: 50 };
 
   // ===== Input (layout‑independent via e.code) =====
   const codes = new Set(); // physical keys like 'KeyW', 'KeyA', …
@@ -284,7 +318,7 @@
   window.addEventListener('pointerup',   () => mouse.down = false);
 
   // ===== Entities =====
-  const bullets = [], enemies = [], particles = [];
+  const bullets = [], enemies = [], particles = [], xpDrops = [];
 
   // ===== Palette (flat, no glow) =====
   const C = { ink:'#111318', white:'#ffffff', floor1:'#232731', floor2:'#1e2230', wall:'#2b3140', wallLine:'#0f1218', ui:'#5fb3ff', p1:'#cfe4ff', visor:'#9ed1ff', pistol:'#5fb3ff', shot:'#5fb3ff', mint:'#58d1a8', blue:'#5fa6ff', pink:'#ff8aa1', gold:'#d9ba4f', violet:'#b192ff', red:'#e76f51' };
@@ -361,7 +395,7 @@
       if(this.type==='shooter'){ this.cd-=dt*1000; if(this.cd<=0 && d<520){ this.cd=900; enemyShoot(this.x,this.y,nx,ny); } this.x+=nx*this.speed*0.4*dt; this.y+=ny*this.speed*0.4*dt; }
       else if(this.type==='dasher'){ this.cd-=dt*1000; if(this.cd<=0 && d<360){ this.cd=1300; this.x+=nx*380*dt; this.y+=ny*380*dt; } else { this.x+=nx*this.speed*dt; this.y+=ny*this.speed*dt; } }
       else { this.x+=nx*this.speed*dt; this.y+=ny*this.speed*dt; }
-      if(this.type==='bomber' && d<this.r+player.r+2){ explode(this.x,this.y,80,2.8); this.dead=true; }
+      if(this.type==='bomber' && d<this.r+player.r+2){ explode(this.x,this.y,80,2.8); xpDrops.push(new XpOrb(this.x, this.y, xpValueFor(this.type))); this.dead=true; }
       // estimate velocity
       const inv = dt>0? (1/dt): 0; this.vx=(this.x-px)*inv; this.vy=(this.y-py)*inv;
     }
@@ -394,9 +428,11 @@
   let boss=null;
 
   function startNewRoom(){
-    bullets.length=0; enemies.length=0; particles.length=0; state.killsInRoom=0; state.bossActive=false; boss=null; state.roomId++;
+    bullets.length=0; enemies.length=0; particles.length=0; xpDrops.length=0; state.killsInRoom=0; state.bossActive=false; boss=null; state.roomId++;
     const pool=[...ALL_TYPES]; roomTypes=[]; while(roomTypes.length<5 && pool.length){ const i=rndInt(0,pool.length-1); roomTypes.push(pool.splice(i,1)[0]); }
     for(let i=0;i<6;i++) spawnEnemy();
+    setTip(`Комната ${state.roomId}\nТипы: ${roomTypes.join(', ')}`);
+    setTimeout(()=>{ clearTipIfNonDeath(); },1500);
     if (centerTip) {
       centerTip.textContent = `Комната ${state.roomId}\nТипы: ${roomTypes.join(', ')}`;
       setTimeout(()=>{ if(centerTip) centerTip.textContent=''; },1500);
@@ -504,7 +540,14 @@
     }
   }
 
+  function setTip(text='', death=false){ if(!centerTip) return; if(death){ centerTip.classList.add('death'); } else { centerTip.classList.remove('death'); } centerTip.textContent = text; }
+  function clearTipIfNonDeath(){ if(centerTip && !centerTip.classList.contains('death')) setTip(''); }
+
   // ===== UI boot text =====
+  setTip('WASD — движение • Мышь/тачпад — прицел • ЛКМ — огонь • Space — рывок\nРывок идёт в сторону движения (WASD), если стоишь — по взгляду.\n[F] авто‑огонь • [X] ассист • [L] pointer-lock');
+  setTimeout(()=>{ clearTipIfNonDeath(); }, 3000);
+
+  function flashTip(txt){ if(!centerTip) return; setTip(txt); setTimeout(()=>{ clearTipIfNonDeath(); }, 1200); }
   centerTip.textContent = 'WASD — движение • Мышь/тачпад — прицел • ЛКМ — огонь • Space — рывок\nРывок идёт в сторону движения (WASD), если стоишь — по взгляду.\n[F] авто‑огонь • [X] ассист • [L] pointer-lock';
   setTimeout(()=>{ if(centerTip) centerTip.textContent=''; }, 3000);
 
@@ -526,6 +569,11 @@
     // === Time ===
     const secs=Math.floor(state.time/1000); const m=(''+Math.floor(secs/60)).padStart(2,'0'); const s=(''+(secs%60)).padStart(2,'0');
     if (timeText){ timeText.textContent = `${m}:${s}`; }
+
+    if (levelIndicator){
+      const xpCurr = Math.max(0, Math.round(state.xp));
+      levelIndicator.textContent = `Ур. ${state.level} — XP ${xpCurr}/${Math.max(1, Math.round(state.nextXp))}`;
+    }
 
     // === Room / wave info ===
     const waveNumber = Math.max(1, state.roomId);
@@ -569,7 +617,16 @@
 
   // ===== Damage/Explosion =====
   class Particle { constructor(x,y, vx,vy, life, color) { this.x=x; this.y=y; this.vx=vx; this.vy=vy; this.life=life; this.max=life; this.color=color; } update(dt){ this.x+=this.vx*dt; this.y+=this.vy*dt; this.vx*=0.98; this.vy*=0.98; this.life-=dt*1000; } draw(){ const t=clamp(this.life/this.max,0,1); ctx.globalAlpha=t; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 2+2*(1-t), 0, TAU); ctx.fill(); ctx.globalAlpha=1; } }
-  function damageEnemy(e, dmg){ e.hp -= dmg; SFX.hit(); for(let i=0;i<4;i++){ particles.push(new Particle(e.x, e.y, rand(-80,80), rand(-80,80), 320, '#e6e8f0')); } if (e.hp<=0){ e.dead=true; state.score += 10; state.killsInRoom++; if(e.type==='slimer'){ for(let i=0;i<2;i++){ enemies.push(new Enemy(e.x+rand(-12,12), e.y+rand(-12,12), 'slimelet')); } } }
+  class XpOrb {
+    constructor(x,y,value){ this.x=x; this.y=y; this.vx=rand(-80,80); this.vy=rand(-80,80); this.value=value; this.r=7; }
+    update(dt){ this.vx*=0.9; this.vy*=0.9; const dx=player.x-this.x, dy=player.y-this.y; const dist=Math.hypot(dx,dy)||1; if(dist<220){ const pull=(1-dist/220); this.vx += (dx/dist)*pull*220*dt; this.vy += (dy/dist)*pull*220*dt; } this.x += this.vx*dt; this.y += this.vy*dt; }
+    draw(){ ctx.save(); ctx.translate(this.x,this.y); const g=ctx.createRadialGradient(0,0,2,0,0,this.r+2); g.addColorStop(0,'#fff1b2'); g.addColorStop(1,'#d7a943'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,this.r+2,0,TAU); ctx.fill(); ctx.strokeStyle='rgba(17,10,28,0.7)'; ctx.lineWidth=3; ctx.stroke(); ctx.restore(); }
+  }
+
+  function xpValueFor(type){ if(type==='brute') return 16; if(type==='shooter') return 12; if(type==='dasher') return 12; if(type==='bomber') return 14; if(type==='slimer') return 14; if(type==='slimelet') return 5; return 10; }
+  function grantXp(amount){ state.xp += amount; while(state.xp >= state.nextXp){ state.xp -= state.nextXp; state.level += 1; state.nextXp = Math.round(state.nextXp * 1.2 + 10); flashTip(`Новый уровень: ${state.level}!`); } for(let i=0;i<6;i++){ particles.push(new Particle(player.x, player.y, rand(-120,120), rand(-120,120), 260, '#ffe89a')); } }
+
+  function damageEnemy(e, dmg){ e.hp -= dmg; SFX.hit(); for(let i=0;i<4;i++){ particles.push(new Particle(e.x, e.y, rand(-80,80), rand(-80,80), 320, '#e6e8f0')); } if (e.hp<=0){ e.dead=true; state.score += 10; state.killsInRoom++; xpDrops.push(new XpOrb(e.x+rand(-6,6), e.y+rand(-6,6), xpValueFor(e.type))); if(e.type==='slimer'){ for(let i=0;i<2;i++){ enemies.push(new Enemy(e.x+rand(-12,12), e.y+rand(-12,12), 'slimelet')); } } }
   }
   function explode(x,y,r, baseDmg){ SFX.boom(); for(let i=0;i<22;i++){ particles.push(new Particle(x, y, Math.cos(i/22*TAU)*rand(40,200), Math.sin(i/22*TAU)*rand(40,200), 600, '#e6e8f0')); } enemies.forEach(e=>{ const d=Math.hypot(e.x-x, e.y-y); if(d<r){ const fall = 1 - d/r; damageEnemy(e, baseDmg*(.5+fall)); }}); }
 
@@ -577,6 +634,9 @@
   function togglePause(){
     state.running = !state.running;
     if (!state.running) {
+      setTip('Пауза — [P] продолжить');
+    } else {
+      clearTipIfNonDeath();
       if (centerTip) centerTip.textContent = 'Пауза — [P] продолжить';
     } else if (centerTip) {
       centerTip.textContent = '';
@@ -638,13 +698,16 @@
       if (!state.bossActive && state.killsInRoom>=18){ boss=new Boss(); state.bossActive=true; }
       if (boss){ boss.update(dt/1000); if (Math.hypot(boss.x-player.x, boss.y-player.y) < boss.r + player.r){ if(player.iTimer<=0){ player.hp-=2; player.iTimer=400; } }
         for (let i=bullets.length-1;i>=0;i--){ const b=bullets[i]; if (!b.enemy){ const d=Math.hypot(boss.x-b.x, boss.y-b.y); if (d < boss.r + b.r){ boss.hp -= b.dmg; bullets.splice(i,1); } } }
-        if (boss.hp<=0){ state.score+=100; boss=null; state.bossActive=false; startNewRoom(); }
+        if (boss.hp<=0){ state.score+=100; grantXp(140); boss=null; state.bossActive=false; startNewRoom(); }
       }
+
+      for (let i=xpDrops.length-1;i>=0;i--){ const orb=xpDrops[i]; orb.update(dt/1000); if (Math.hypot(player.x-orb.x, player.y-orb.y) < player.r + orb.r + 4){ grantXp(orb.value); xpDrops.splice(i,1); } }
 
       // Spawn loop (skip if boss-only)
       state.lastSpawn += dt; const rate = Math.max(420, state.spawnRate - state.time*0.05); if (!state.bossActive && state.lastSpawn > rate){ state.lastSpawn = 0; spawnEnemy(); if (Math.random()<0.25) spawnEnemy(); }
 
       // Death
+      if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); setTip(`Вы пали.\nСчёт: ${state.score}\nРекорд: ${best}\nНажми R, чтобы сыграть снова`, true); }
       if (player.hp<=0){ state.running=false; const best = Math.max(+(localStorage.getItem('soulLiteBest')||0), state.score); localStorage.setItem('soulLiteBest', best); centerTip.textContent = `Вы пали.\nСчёт: ${state.score}\nРекорд: ${best}\nНажми R, чтобы сыграть снова`; }
     }
 
@@ -658,7 +721,7 @@
     const aimX = player.x + Math.cos(player.angle)*32, aimY = player.y + Math.sin(player.angle)*32; ctx.strokeStyle=C.white; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(aimX, aimY, 10, 0, TAU); ctx.stroke();
 
     // bullets, enemies, boss
-    bullets.forEach(b=>b.draw()); enemies.forEach(e=>e.draw()); if (boss) boss.draw();
+    bullets.forEach(b=>b.draw()); enemies.forEach(e=>e.draw()); if (boss) boss.draw(); xpDrops.forEach(o=>o.draw());
 
     // particles
     particles.forEach(p=>p.update(dt/1000)); for (let i=particles.length-1;i>=0;i--){ const p=particles[i]; if (p.life<=0) particles.splice(i,1); else p.draw(); }
@@ -674,6 +737,7 @@
     if (e.code==='KeyE'){ player.weaponIdx = (player.weaponIdx + 1)%weapons.length; renderWeaponList(); }
     if (e.code==='KeyR' && player.hp<=0){ restart(); }
   });
+  function restart(){ bullets.length=0; enemies.length=0; particles.length=0; xpDrops.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; state.xp=0; state.level=1; state.nextXp=50; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; setTip(''); startNewRoom(); }
   function restart(){ bullets.length=0; enemies.length=0; particles.length=0; state.time=0; state.score=0; state.lastSpawn=0; state.roomId=0; player.hp=player.maxHp; player.x=canvas.clientWidth/2; player.y=canvas.clientHeight/2; player.dashCd=0; player.iTimer=0; state.running=true; if(centerTip) centerTip.textContent=''; startNewRoom(); }
 
   // ===== Boot sequence =====
@@ -682,7 +746,12 @@
   requestAnimationFrame(frame);
 
   // ===== Minimal & Added Tests =====
-  function setTestStatus(msg, ok=true){ testStatus.style.display='block'; testStatus.textContent = (ok? '✅ ':'❌ ') + msg; testStatus.style.borderColor = ok? '#2a2f3a' : '#a33'; }
+  function setTestStatus(msg, ok=true){
+    if (!msg){ testStatus.style.display='none'; testStatus.textContent=''; return; }
+    testStatus.style.display='block';
+    testStatus.textContent = (ok? '✅ ':'❌ ') + msg;
+    testStatus.style.borderColor = ok? '#2a2f3a' : '#a33';
+  }
   function assert(cond, msg){ if(!cond) throw new Error(msg); }
   function runTests(){
     try {
@@ -762,7 +831,7 @@
       // Restore enemies
       enemies.length = 0; for(const x of saveEnemies) enemies.push(x);
 
-      setTestStatus('All tests passed');
+      setTestStatus('');
     } catch(e){
       console.error('[TEST FAIL]', e); setTestStatus(e.message, false);
     }
